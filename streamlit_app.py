@@ -78,6 +78,11 @@ class OpenRouterLLM(LLM):
         
         return response.json()["choices"][0]["message"]["content"]
 
+from langchain_core.language_models import ChatResult
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.outputs import ChatGeneration
+from typing import List, Optional, Any, Union, Mapping
+import requests
 # Custom OpenRouter Chat Model
 class OpenRouterChatModel(BaseChatModel):
     model_name: str
@@ -93,10 +98,11 @@ class OpenRouterChatModel(BaseChatModel):
         stop: Optional[List[str]] = None,
         run_manager: Optional = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> ChatResult:
         headers = {
             "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
+            "HTTP-Referer": "YOUR_APP_URL",  # Required by OpenRouter
+            "X-Title": "YOUR_APP_NAME"       # Recommended
         }
         
         formatted_messages = []
@@ -117,7 +123,8 @@ class OpenRouterChatModel(BaseChatModel):
         
         payload = {
             "model": self.model_name,
-            "messages": formatted_messages
+            "messages": formatted_messages,
+            **kwargs
         }
         
         if stop:
@@ -130,19 +137,28 @@ class OpenRouterChatModel(BaseChatModel):
         )
         
         if response.status_code != 200:
-            raise ValueError(f"Error from OpenRouter API: {response.text}")
+            raise ValueError(f"OpenRouter API Error {response.status_code}: {response.text}")
         
-        return {
-            "generations": [{
-                "text": response.json()["choices"][0]["message"]["content"],
-                "message": AIMessage(content=response.json()["choices"][0]["message"]["content"])
-            }]
-        }
+        response_data = response.json()
+        message = response_data["choices"][0]["message"]
+        
+        return ChatResult(
+            generations=[
+                ChatGeneration(
+                    message=AIMessage(content=message["content"]),
+                    generation_info=response_data.get("usage", {})
+                )
+            ],
+            llm_output={
+                "model": self.model_name,
+                "usage": response_data.get("usage", {})
+            }
+        )
     
     @property
     def _identifying_params(self) -> Mapping[str, Any]:
         return {"model_name": self.model_name}
-
+    
 # Image handling functions
 def resize_image(image, max_dimension=300):
     """Resize image with the longest dimension set to max_dimension"""
