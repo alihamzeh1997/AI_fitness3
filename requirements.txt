@@ -6,3 +6,4 @@ faiss-cpu
 pillow 
 requests
 tiktoken
+sentence-transformers
