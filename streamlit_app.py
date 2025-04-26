@@ -340,7 +340,7 @@ def create_rag_system(segment_analyses, timestamps):
         documents.append(doc)
     
     # Create embedding function
-    embedding_function = OpenAIEmbeddings(openai_api_key=st.secrets["openrouter_api_key"])
+    embedding_function = OpenAIEmbeddings(openai_api_key=st.secrets["openrouter_api_key"], openai_api_base="https://openrouter.ai/api/v1")
     
     # Create vector store
     vector_store = FAISS.from_documents(documents, embedding_function)
