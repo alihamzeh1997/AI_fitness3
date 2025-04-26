@@ -1,6 +1,6 @@
 streamlit
 opencv-python-headless
-langchain 
+langchain-community
 openai 
 faiss-cpu 
 pillow 
