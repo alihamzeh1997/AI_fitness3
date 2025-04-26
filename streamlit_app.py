@@ -20,6 +20,8 @@ from langchain.schema import Document
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
+from langchain_community.embeddings import HuggingFaceEmbeddings
+
 
 # Install required packages
 # pip install streamlit opencv-python numpy langchain openai faiss-cpu pillow
@@ -340,8 +342,15 @@ def create_rag_system(segment_analyses, timestamps):
         documents.append(doc)
     
     # Create embedding function
-    embedding_function = OpenAIEmbeddings(openai_api_key=st.secrets["openrouter_api_key"], openai_api_base="https://openrouter.ai/api/v1")
-    
+    # embedding_function = OpenAIEmbeddings(openai_api_key=st.secrets["openrouter_api_key"], openai_api_base="https://openrouter.ai/api/v1")
+    model_name = "BAAI/bge-small-en-v1.5"  # Top open-source model
+    embedding_function = HuggingFaceEmbeddings(
+        model_name=model_name,
+        model_kwargs={"device": "cpu"},  # or "cuda" if you have GPU
+        encode_kwargs={"normalize_embeddings": True}
+        )
+
+
     # Create vector store
     vector_store = FAISS.from_documents(documents, embedding_function)
     
