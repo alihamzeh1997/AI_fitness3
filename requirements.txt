@@ -1,1 +1,7 @@
 streamlit
+opencv-python 
+langchain 
+openai 
+faiss-cpu 
+pillow 
+requests
