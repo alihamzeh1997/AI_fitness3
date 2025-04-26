@@ -470,7 +470,7 @@ def main():
             if password:
                 if password == st.secrets["app_password"]:
                     st.session_state.authenticated = True
-                    st.experimental_rerun()
+                    st.rerun()
                 else:
                     st.error("Incorrect password. Please try again.")
             return
@@ -742,7 +742,7 @@ def main():
                     st.session_state.messages.append({"role": "assistant", "content": answer})
                 
                 # Clear input and rerun to update chat
-                st.experimental_rerun()
+                st.rerun()
         else:
             st.info("Upload and analyze a video to start chatting!")
     
